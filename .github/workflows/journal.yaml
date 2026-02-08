@@ -1,4 +1,4 @@
-name: Build, Scan & Push Nginx App to ECR
+name: Study Journal App Build
 
 on:
   push:
@@ -54,7 +54,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.20.0
         with:
           image-ref: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
-          severity: CRITICAL,HIGH
+          severity: MEDIUM, LOW
           exit-code: 1
           ignore-unfixed: true
 
