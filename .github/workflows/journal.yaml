@@ -1,0 +1,71 @@
+name: Build, Scan & Push Nginx App to ECR
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  id-token: write   # REQUIRED for OIDC
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  IMAGE_NAME: journal
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+
+jobs:
+  build-scan-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # ---------------------------
+      # AWS Auth (OIDC)
+      # ---------------------------
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_OIDC }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # ---------------------------
+      # Build Docker Image
+      # ---------------------------
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./study-journal-app/
+          push: false
+          load: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+
+      # ---------------------------
+      # Trivy Image Scan
+      # ---------------------------
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+
+      # ---------------------------
+      # Push to ECR
+      # ---------------------------
+      - name: Push image to Amazon ECR
+        uses: docker/build-push-action@v5
+        with:
+          context: ./study-journal-app/
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+            ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
