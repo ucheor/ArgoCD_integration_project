@@ -100,8 +100,10 @@ jobs:
       # ---------------------------
       - name: Deploy to EKS
         run: |
-            kubectl apply -f ./focus-timer-app/focus-deployment.yaml
-            kubectl apply -f ./focus-timer-app/focus-service.yaml
+            kubectl get namespace focus || kubectl create namespace focus
+            kubectl apply -f ./focus-timer-app/focus-deployment.yaml -n focus
+            kubectl apply -f ./focus-timer-app/focus-service.yaml -n focus
+            kubectl get all -n focus
 
         #   kubectl set image deployment/${{ env.K8S_DEPLOYMENT }} \
         #     ${{ env.K8S_CONTAINER }}=${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }} \
