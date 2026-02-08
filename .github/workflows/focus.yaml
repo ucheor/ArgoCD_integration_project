@@ -93,7 +93,7 @@ jobs:
       # ---------------------------
       - name: Update kubeconfig
         run: |
-          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} --role-arn ${{ secrets.AWS_ROLE_ARN_OIDC }}
 
       # ---------------------------
       # Deploy to EKS
