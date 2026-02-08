@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Ordering System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #a8e6cf 0%, #dcedc1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #a8e6cf 0%, #88d8b0 100%);
+            color: #2d5f4d;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .menu-section {
+            padding: 30px;
+        }
+
+        .category {
+            margin-bottom: 30px;
+        }
+
+        .category-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #5fa881;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #5fa881;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .menu-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .item-price {
+            color: #5fa881;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-control button {
+            width: 35px;
+            height: 35px;
+            border: none;
+            background: #88d8b0;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.3s;
+        }
+
+        .quantity-control button:hover {
+            background: #5fa881;
+            transform: scale(1.1);
+        }
+
+        .quantity-control input {
+            width: 50px;
+            text-align: center;
+            border: 2px solid #88d8b0;
+            border-radius: 5px;
+            padding: 5px;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        .order-button {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #88d8b0 0%, #5fa881 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .order-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(136, 216, 176, 0.4);
+        }
+
+        .receipt-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .receipt-content {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .receipt {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .receipt-header {
+            text-align: center;
+            border-bottom: 2px dashed #333;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .receipt-header h2 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .receipt-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .receipt-separator {
+            border-top: 2px dashed #333;
+            margin: 15px 0;
+        }
+
+        .receipt-total {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px dashed #333;
+        }
+
+        .close-button {
+            width: 100%;
+            padding: 15px;
+            background: #88d8b0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .close-button:hover {
+            background: #5fa881;
+        }
+
+        .print-button {
+            width: 100%;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .print-button:hover {
+            background: #218838;
+        }
+
+        .customer-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .customer-info h3 {
+            color: #5fa881;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #88d8b0;
+            border-radius: 5px;
+            font-size: 1em;
+            font-family: 'Courier New', monospace;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #5fa881;
+        }
+
+        .tip-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tip-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #88d8b0;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .tip-btn:hover {
+            background: #dcedc1;
+        }
+
+        .tip-btn.active {
+            background: #88d8b0;
+            color: white;
+        }
+
+        .tip-input-group {
+            display: none;
+        }
+
+        .tip-input-group.active {
+            display: block;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .receipt-content, .receipt-content * {
+                visibility: visible;
+            }
+            .receipt-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                box-shadow: none;
+            }
+            .close-button, .print-button {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Argo Vibe Eatery</h1>
+            <p>Select your items and place your order</p>
+            <p>Study - Eat - Repeat</p>
+        </div>
+
+        <div class="menu-section">
+            <!-- Customer Information -->
+            <div class="customer-info">
+                <h3>👤 Customer Information (Optional)</h3>
+                <div class="input-group">
+                    <label for="customerName">Name:</label>
+                    <input type="text" id="customerName" placeholder="Enter your name (optional)">
+                </div>
+            </div>
+
+            <!-- Starters -->
+            <div class="category">
+                <div class="category-title">🥖 Starters</div>
+                <div th:each="item : ${menuItems}" th:if="${item.category == 'Starters'}">
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name" th:text="${item.name}">Item Name</div>
+                        </div>
+                        <div class="item-price" th:text="'$' + ${#numbers.formatDecimal(item.price, 1, 2)}">$0.00</div>
+                        <div class="quantity-control">
+                            <button onclick="changeQuantity(this, -1)">-</button>
+                            <input type="number" min="0" max="3" value="0" th:data-name="${item.name}" th:data-price="${item.price}">
+                            <button onclick="changeQuantity(this, 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Courses -->
+            <div class="category">
+                <div class="category-title">🍝 Main Courses</div>
+                <div th:each="item : ${menuItems}" th:if="${item.category == 'Main Courses'}">
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name" th:text="${item.name}">Item Name</div>
+                        </div>
+                        <div class="item-price" th:text="'$' + ${#numbers.formatDecimal(item.price, 1, 2)}">$0.00</div>
+                        <div class="quantity-control">
+                            <button onclick="changeQuantity(this, -1)">-</button>
+                            <input type="number" min="0" max="3" value="0" th:data-name="${item.name}" th:data-price="${item.price}">
+                            <button onclick="changeQuantity(this, 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desserts -->
+            <div class="category">
+                <div class="category-title">🍰 Desserts</div>
+                <div th:each="item : ${menuItems}" th:if="${item.category == 'Desserts'}">
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name" th:text="${item.name}">Item Name</div>
+                        </div>
+                        <div class="item-price" th:text="'$' + ${#numbers.formatDecimal(item.price, 1, 2)}">$0.00</div>
+                        <div class="quantity-control">
+                            <button onclick="changeQuantity(this, -1)">-</button>
+                            <input type="number" min="0" max="3" value="0" th:data-name="${item.name}" th:data-price="${item.price}">
+                            <button onclick="changeQuantity(this, 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drinks -->
+            <div class="category">
+                <div class="category-title">🥤 Drinks</div>
+                <div th:each="item : ${menuItems}" th:if="${item.category == 'Drinks'}">
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name" th:text="${item.name}">Item Name</div>
+                        </div>
+                        <div class="item-price" th:text="'$' + ${#numbers.formatDecimal(item.price, 1, 2)}">$0.00</div>
+                        <div class="quantity-control">
+                            <button onclick="changeQuantity(this, -1)">-</button>
+                            <input type="number" min="0" max="3" value="0" th:data-name="${item.name}" th:data-price="${item.price}">
+                            <button onclick="changeQuantity(this, 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seasonal Special -->
+            <div class="category">
+                <div class="category-title">🌱 Seasonal Special</div>
+                <div th:each="item : ${menuItems}" th:if="${item.category == 'Seasonal Special'}">
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <div class="item-name" th:text="${item.name}">Item Name</div>
+                        </div>
+                        <div class="item-price" th:text="'$' + ${#numbers.formatDecimal(item.price, 1, 2)}">$0.00</div>
+                        <div class="quantity-control">
+                            <button onclick="changeQuantity(this, -1)">-</button>
+                            <input type="number" min="0" max="3" value="0" th:data-name="${item.name}" th:data-price="${item.price}">
+                            <button onclick="changeQuantity(this, 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Tip Section -->
+            <div class="customer-info">
+                <h3>💰 Add Tip (Atasssssa!!!)</h3>
+                <div class="tip-options">
+                    <button class="tip-btn" onclick="selectTipOption('none')">No Tip</button>
+                    <button class="tip-btn" onclick="selectTipOption('percentage')">Percentage</button>
+                    <button class="tip-btn" onclick="selectTipOption('amount')">Amount</button>
+                </div>
+                <div id="percentageTip" class="tip-input-group">
+                    <div class="input-group">
+                        <label for="tipPercentage">Tip Percentage:</label>
+                        <select id="tipPercentage" onchange="calculateTip()">
+                            <option value="0">0%</option>
+                            <option value="10">10%</option>
+                            <option value="15" selected>15%</option>
+                            <option value="18">18%</option>
+                            <option value="20">20%</option>
+                            <option value="25">25%</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="amountTip" class="tip-input-group">
+                    <div class="input-group">
+                        <label for="tipAmount">Tip Amount ($):</label>
+                        <input type="number" id="tipAmount" min="0" step="0.01" value="0" placeholder="0.00" onchange="calculateTip()">
+                    </div>
+                </div>
+            </div>
+
+            <button class="order-button" onclick="placeOrder()">Place Order & Get Receipt</button>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="receipt-modal">
+        <div class="receipt-content">
+            <div id="receiptDisplay" class="receipt"></div>
+            <button class="print-button" onclick="window.print()">🖨️ Print Receipt</button>
+            <button class="close-button" onclick="closeReceipt()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        let currentTipOption = 'none';
+        let tipValue = 0;
+
+        function selectTipOption(option) {
+            currentTipOption = option;
+            
+            // Update button states
+            document.querySelectorAll('.tip-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show/hide tip inputs
+            document.getElementById('percentageTip').classList.remove('active');
+            document.getElementById('amountTip').classList.remove('active');
+            
+            if (option === 'percentage') {
+                document.getElementById('percentageTip').classList.add('active');
+                calculateTip();
+            } else if (option === 'amount') {
+                document.getElementById('amountTip').classList.add('active');
+                calculateTip();
+            } else {
+                tipValue = 0;
+            }
+        }
+
+        function calculateTip() {
+            if (currentTipOption === 'percentage') {
+                const percentage = parseFloat(document.getElementById('tipPercentage').value) || 0;
+                // Tip will be calculated based on subtotal when ordering
+                tipValue = percentage;
+            } else if (currentTipOption === 'amount') {
+                tipValue = parseFloat(document.getElementById('tipAmount').value) || 0;
+            } else {
+                tipValue = 0;
+            }
+        }
+
+        function changeQuantity(button, delta) {
+            const input = button.parentElement.querySelector('input');
+            let value = parseInt(input.value) || 0;
+            value = Math.max(0, Math.min(3, value + delta));
+            input.value = value;
+        }
+
+        function placeOrder() {
+            const inputs = document.querySelectorAll('input[type="number"][data-name]');
+            const order = {};
+            let hasItems = false;
+
+            inputs.forEach(input => {
+                const quantity = parseInt(input.value) || 0;
+                if (quantity > 0) {
+                    const itemName = input.getAttribute('data-name');
+                    order[itemName] = quantity;
+                    hasItems = true;
+                }
+            });
+
+            if (!hasItems) {
+                alert('Please select at least one item!');
+                return;
+            }
+
+            fetch('/order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(order)
+            })
+            .then(response => response.json())
+            .then(data => displayReceipt(data))
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error processing order!');
+            });
+        }
+
+        function displayReceipt(receipt) {
+            const customerName = document.getElementById('customerName').value.trim();
+            
+            let html = `
+                <div class="receipt-header">
+                    <h2>ARGO VIBE EATERY</h2>
+                    <p>${new Date().toLocaleString()}</p>
+            `;
+            
+            if (customerName) {
+                html += `<p style="margin-top: 10px; font-weight: bold;">Customer: ${customerName}</p>`;
+            }
+            
+            html += `</div>`;
+
+            if (receipt.items && receipt.items.length > 0) {
+                receipt.items.forEach(item => {
+                    const name = item.menuItem.name;
+                    const qty = item.quantity;
+                    const total = item.lineTotal.toFixed(2);
+                    html += `
+                        <div class="receipt-item">
+                            <span>${name} x${qty}</span>
+                            <span>$${total}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            const subtotal = receipt.subtotal.toFixed(2);
+            const taxRate = (receipt.taxRate * 100).toFixed(0);
+            const taxAmount = receipt.taxAmount.toFixed(2);
+            
+            // Calculate tip based on option
+            let tipAmount = 0;
+            let tipLabel = '';
+            
+            if (currentTipOption === 'percentage') {
+                const percentage = parseFloat(document.getElementById('tipPercentage').value) || 0;
+                tipAmount = receipt.subtotal * (percentage / 100);
+                tipLabel = `Tip (${percentage}%)`;
+            } else if (currentTipOption === 'amount') {
+                tipAmount = parseFloat(document.getElementById('tipAmount').value) || 0;
+                tipLabel = 'Tip';
+            }
+            
+            const total = (parseFloat(subtotal) + parseFloat(taxAmount) + tipAmount).toFixed(2);
+
+            html += `
+                <div class="receipt-separator"></div>
+                <div class="receipt-item">
+                    <span>Subtotal</span>
+                    <span>$${subtotal}</span>
+                </div>
+                <div class="receipt-item">
+                    <span>Tax (${taxRate}%)</span>
+                    <span>$${taxAmount}</span>
+                </div>
+            `;
+            
+            if (tipAmount > 0) {
+                html += `
+                    <div class="receipt-item">
+                        <span>${tipLabel}</span>
+                        <span>$${tipAmount.toFixed(2)}</span>
+                    </div>
+                `;
+            }
+            
+            html += `
+                <div class="receipt-separator"></div>
+                <div class="receipt-item receipt-total">
+                    <span>TOTAL</span>
+                    <span>$${total}</span>
+                </div>
+                <div class="receipt-footer">
+                    <p>Thank you for your order!</p>
+                    <p>Please come again! 😊</p>
+                </div>
+            `;
+
+            document.getElementById('receiptDisplay').innerHTML = html;
+            document.getElementById('receiptModal').style.display = 'flex';
+        }
+
+        function closeReceipt() {
+            document.getElementById('receiptModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

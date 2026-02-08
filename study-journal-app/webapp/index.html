@@ -1,0 +1,1621 @@
+ps <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Study Journal</title>
+    <style>
+        :root {
+            --primary-color: #2563EB;
+            --primary-light: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --secondary-color: #7C3AED;
+            --bg-color: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-color: #1E293B;
+            --text-light: #64748B;
+            --border-color: #E2E8F0;
+            --shadow-color: rgba(37, 99, 235, 0.1);
+            --success-color: #10B981;
+            --warning-color: #EF4444;
+            --highlight-color: #F59E0B;
+        }
+
+        .dark-mode {
+            --primary-color: #60A5FA;
+            --primary-light: #93C5FD;
+            --primary-dark: #3B82F6;
+            --secondary-color: #A78BFA;
+            --bg-color: #0F172A;
+            --card-bg: #1E293B;
+            --text-color: #F1F5F9;
+            --text-light: #94A3B8;
+            --border-color: #334155;
+            --shadow-color: rgba(96, 165, 250, 0.15);
+            --success-color: #34D399;
+            --warning-color: #F87171;
+            --highlight-color: #FBBF24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-color);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle-container {
+            position: relative;
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            transition: all 0.3s;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px var(--shadow-color);
+            border-color: var(--primary-color);
+        }
+
+        .theme-toggle span {
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle .theme-text {
+            font-size: 0.9rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 10px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            font-weight: 400;
+            margin-bottom: 4px;
+        }
+
+        /* UNIFORM GRID - All columns same width */
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 968px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 8px 24px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px var(--shadow-color);
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 24px;
+            font-size: 1.4rem;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 i {
+            color: var(--secondary-color);
+        }
+
+        .mood-selector {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .mood-btn {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 8px;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            color: var(--text-color);
+        }
+
+        .mood-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px var(--shadow-color);
+            border-color: var(--primary-light);
+        }
+
+        .mood-btn.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.08);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+        }
+
+        .mood-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            display: block;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        .date-selector {
+            margin-bottom: 24px;
+        }
+
+        .date-selector label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .date-selector input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: var(--card-bg);
+            color: var(--text-color);
+            transition: all 0.3s;
+        }
+
+        .date-selector input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .study-area {
+            margin-bottom: 20px;
+        }
+
+        .study-area label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .study-area input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: var(--card-bg);
+            color: var(--text-color);
+            transition: all 0.3s;
+        }
+
+        .study-area input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        .study-area input::placeholder {
+            color: var(--text-light);
+        }
+
+        .study-notes {
+            margin-bottom: 24px;
+        }
+
+        .study-notes label {
+            display: block;
+            margin-bottom: 12px;
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .study-notes label span {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-weight: normal;
+            margin-left: auto;
+        }
+
+        .study-notes textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 180px;
+            transition: all 0.3s;
+            background: var(--card-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .study-notes textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .study-notes textarea::placeholder {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 24px;
+            width: 100%;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #64748B;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .entry-counter {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 12px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Study Progress Stats */
+        .progress-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .progress-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 14px;
+            text-align: center;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .progress-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-3px);
+        }
+
+        .progress-card h3 {
+            color: var(--text-color);
+            margin-bottom: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .progress-mood {
+            font-size: 2.8rem;
+            margin: 12px 0;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 8px 0;
+        }
+
+        .progress-label {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        /* Calendar */
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .calendar-header {
+            font-weight: 600;
+            color: var(--text-light);
+            text-align: center;
+            padding: 10px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            background: var(--card-bg);
+            position: relative;
+            color: var(--text-color);
+        }
+
+        .calendar-day:hover {
+            background: var(--primary-light);
+            color: white;
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        .calendar-day.has-entry {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+
+        .calendar-day .day-number {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .calendar-day .day-mood {
+            font-size: 1.3rem;
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.4;
+            background: var(--bg-color);
+        }
+
+        .calendar-day.today {
+            border-color: var(--highlight-color);
+            background: var(--highlight-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .calendar-day .entry-count {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: white;
+            color: var(--primary-color);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .calendar-day.has-entry .entry-count {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .month-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .month-nav button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .month-nav button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .month-nav h3 {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        /* Entries List */
+        .entries-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 12px;
+        }
+
+        .entry-item {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+
+        .entry-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .entry-mood {
+            font-size: 1.6rem;
+            margin-right: 12px;
+        }
+
+        .entry-subject {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .entry-text {
+            color: var(--text-color);
+            line-height: 1.7;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            white-space: pre-wrap;
+        }
+
+        .entry-text strong {
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        .delete-btn {
+            background: var(--warning-color);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .delete-btn:hover {
+            background: #DC2626;
+            transform: scale(1.05);
+        }
+
+        /* IMPROVED TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+            transform: translateX(400px);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 400px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, var(--warning-color), #DC2626);
+            box-shadow: 0 10px 40px rgba(239, 68, 68, 0.4);
+        }
+
+        .toast-icon {
+            font-size: 1.6rem;
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }
+
+        .toast-message {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .max-entries-warning {
+            color: var(--warning-color);
+            font-size: 0.9rem;
+            margin-top: 12px;
+            text-align: center;
+            font-weight: 500;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Learning Wisdom Quotes Section */
+        .wisdom-section {
+            margin-top: 40px;
+            padding: 32px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(124, 58, 237, 0.05));
+            border-radius: 18px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            border: 2px solid var(--border-color);
+        }
+
+        .wisdom-section h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 32px;
+            font-size: 1.8rem;
+            padding-bottom: 16px;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .wisdom-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        .wisdom-card {
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: 16px;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wisdom-card::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            font-size: 5rem;
+            color: var(--primary-color);
+            opacity: 0.1;
+            font-family: Georgia, serif;
+        }
+
+        .wisdom-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px var(--shadow-color);
+            border-color: var(--primary-color);
+        }
+
+        .wisdom-text {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: var(--text-color);
+            line-height: 1.8;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .wisdom-author {
+            text-align: right;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1rem;
+            padding-top: 12px;
+            border-top: 2px solid var(--border-color);
+        }
+
+        /* Date Entry Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s;
+            border: 2px solid var(--border-color);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+            font-size: 1.6rem;
+            margin: 0;
+            border: none;
+            padding: 0;
+        }
+
+        .modal-close {
+            background: var(--warning-color);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: #DC2626;
+            transform: rotate(90deg);
+        }
+
+        .modal-date {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 24px;
+            padding: 12px;
+            background: rgba(37, 99, 235, 0.05);
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Animation for saved entry */
+        @keyframes saveAnimation {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+            }
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        .save-animation {
+            animation: saveAnimation 0.8s ease-out;
+        }
+
+        /* Motivational Message with Pulse Animation */
+        .motivation-box {
+            margin-top: 24px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(124, 58, 237, 0.08));
+            border-radius: 12px;
+            border: 2px solid var(--primary-color);
+            text-align: center;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .motivation-box p {
+            color: var(--text-color);
+            font-size: 1rem;
+            line-height: 1.8;
+            margin: 0 0 12px 0;
+            font-weight: 500;
+        }
+
+        .motivation-box .lets-go {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: 8px;
+            display: inline-block;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+                border-color: var(--primary-color);
+            }
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 0 20px 10px rgba(37, 99, 235, 0);
+                border-color: var(--secondary-color);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Toggle -->
+        <div class="theme-toggle-container">
+            <div class="theme-toggle" id="themeToggle">
+                <span id="themeIcon">🌙</span>
+                <span class="theme-text" id="themeText">Dark Mode</span>
+            </div>
+        </div>
+
+        <header>
+            <h1>📚 Study Progress Journal</h1>
+            <p class="subtitle">Track your learning journey, reflect on progress, and improve your study habits</p>
+            <p class="subtitle">What did you learn? What can you improve?</p>
+        </header>
+
+        <div class="main-grid">
+            <div class="card">
+                <h2>📝 DevOps Study Entry</h2>
+                
+                <div class="date-selector">
+                    <label for="entryDate">Study Date (Within last 30 days or next 10 days)</label>
+                    <input type="date" id="entryDate" max="" min="">
+                </div>
+
+                <div class="study-area">
+                    <label for="studySubject">Subject / Topic Studied</label>
+                    <input type="text" id="studySubject" placeholder="e.g., Linux Commands, Ingress Controller, GitOps with ArgoCD">
+                </div>
+
+                <div class="study-area">
+                    <label>How productive was your study session?</label>
+                    <div class="mood-selector" id="moodSelector">
+                        <button class="mood-btn" data-mood="😊" data-value="5">
+                            😊
+                            <span class="mood-label">Very Productive</span>
+                        </button>
+                        <button class="mood-btn" data-mood="🙂" data-value="4">
+                            🙂
+                            <span class="mood-label">Productive</span>
+                        </button>
+                        <button class="mood-btn" data-mood="😐" data-value="3">
+                            😐
+                            <span class="mood-label">Moderate</span>
+                        </button>
+                        <button class="mood-btn" data-mood="😔" data-value="2">
+                            😔
+                            <span class="mood-label">Distracted</span>
+                        </button>
+                        <button class="mood-btn" data-mood="😢" data-value="1">
+                            😢
+                            <span class="mood-label">Unproductive</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="study-notes">
+                    <label for="studyNotes">
+                        Study Notes
+                        <span>Optional: What you learned, improvements, next steps</span>
+                    </label>
+                    <textarea id="studyNotes" placeholder="Write your study notes or goals here...
+
+• What did you learn today?
+• What concepts were challenging?
+• What are your next study goals?
+
+You can use bullet points or write in paragraphs. Be specific about your learning progress!"></textarea>
+                </div>
+
+                <button class="btn" id="saveEntry">Save Study Entry 📚</button>
+                <div class="entry-counter" id="entryCounter">Entries today: 0/3</div>
+                <div id="maxEntriesWarning" class="max-entries-warning" style="display: none;">Maximum 3 entries per day reached!</div>
+                
+                <!-- Motivational Message -->
+                <div class="motivation-box">
+                    <p>Every study session, every annoying troubleshooting brings us closer to our goals.</p>
+                    <p>As long as we keep learning and growing, it's going to happen.</p>
+                    <div class="lets-go">Let's Go!! 🚀</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📊 Study Progress</h2>
+                
+                <div class="progress-stats">
+                    <div class="progress-card">
+                        <h3>Last 30 Days</h3>
+                        <div class="progress-mood" id="avgMood30Days">-</div>
+                        <div class="progress-value" id="avgValue30Days">-</div>
+                        <div class="progress-label">Average Productivity</div>
+                    </div>
+                    <div class="progress-card">
+                        <h3>Last 90 Days</h3>
+                        <div class="progress-mood" id="avgMood90Days">-</div>
+                        <div class="progress-value" id="avgValue90Days">-</div>
+                        <div class="progress-label">Average Productivity</div>
+                    </div>
+                </div>
+
+                <h2>📅 Study Calendar</h2>
+                <div class="month-nav">
+                    <button id="prevMonth">← Previous</button>
+                    <h3 id="currentMonth">December 2024</h3>
+                    <button id="nextMonth">Next →</button>
+                </div>
+                <div class="calendar">
+                    <div class="calendar-header">Sun</div>
+                    <div class="calendar-header">Mon</div>
+                    <div class="calendar-header">Tue</div>
+                    <div class="calendar-header">Wed</div>
+                    <div class="calendar-header">Thu</div>
+                    <div class="calendar-header">Fri</div>
+                    <div class="calendar-header">Sat</div>
+                </div>
+                <div id="calendarDays" class="calendar"></div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="card">
+                <h2>📖 Recent Study Entries</h2>
+                <div class="entries-list" id="entriesList">
+                    <div class="no-entries">No study entries yet. Start tracking your learning journey!</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>💡 Study Tips</h2>
+                <div class="entries-list">
+                    <div class="inspiration-item" style="margin-bottom: 20px; padding: 16px; background: rgba(37, 99, 235, 0.05); border-radius: 12px; border-left: 4px solid var(--secondary-color);">
+                        <h3 style="color: var(--primary-color); margin-bottom: 8px; font-size: 1rem;">🎯 The Feynman Technique</h3>
+                        <p style="color: var(--text-color); font-size: 0.95rem; line-height: 1.6;">
+                            Teach what you've learned to someone else (or pretend to). If you can explain it simply, you truly understand it.
+                        </p>
+                    </div>
+                    <div class="inspiration-item" style="margin-bottom: 20px; padding: 16px; background: rgba(16, 185, 129, 0.05); border-radius: 12px; border-left: 4px solid var(--success-color);">
+                        <h3 style="color: var(--success-color); margin-bottom: 8px; font-size: 1rem;">⏰ Pomodoro Technique</h3>
+                        <p style="color: var(--text-color); font-size: 0.95rem; line-height: 1.6;">
+                            Study in focused 25-minute intervals with 5-minute breaks. After 4 intervals, take a longer 15-30 minute break.
+                        </p>
+                    </div>
+                    <div class="inspiration-item" style="padding: 16px; background: rgba(245, 158, 11, 0.05); border-radius: 12px; border-left: 4px solid var(--highlight-color);">
+                        <h3 style="color: var(--highlight-color); margin-bottom: 8px; font-size: 1rem;">🧠 Spaced Repetition</h3>
+                        <p style="color: var(--text-color); font-size: 0.95rem; line-height: 1.6;">
+                            Review material at increasing intervals to improve long-term retention. Regular review beats cramming every time.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learning Wisdom Section -->
+        <div class="wisdom-section">
+            <h2>🌟 Learning Wisdom</h2>
+            <div class="wisdom-grid">
+                <div class="wisdom-card">
+                    <div class="wisdom-text">The beautiful thing about learning is that no one can take it away from you.</div>
+                    <div class="wisdom-author">— B.B. King</div>
+                </div>
+                <div class="wisdom-card">
+                    <div class="wisdom-text">Education is the most powerful weapon which you can use to change the world.</div>
+                    <div class="wisdom-author">— Nelson Mandela</div>
+                </div>
+                <div class="wisdom-card">
+                    <div class="wisdom-text">The capacity to learn is a gift; the ability to learn is a skill; the willingness to learn is a choice.</div>
+                    <div class="wisdom-author">— Brian Herbert</div>
+                </div>
+                <div class="wisdom-card">
+                    <div class="wisdom-text">Live as if you were to die tomorrow. Learn as if you were to live forever.</div>
+                    <div class="wisdom-author">— Mahatma Gandhi</div>
+                </div>
+                <div class="wisdom-card">
+                    <div class="wisdom-text">The more that you read, the more things you will know. The more that you learn, the more places you'll go.</div>
+                    <div class="wisdom-author">— Dr. Seuss</div>
+                </div>
+                <div class="wisdom-card">
+                    <div class="wisdom-text">Education is not preparation for life; education is life itself.</div>
+                    <div class="wisdom-author">— John Dewey</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Improved Toast Notification -->
+    <div class="toast" id="saveToast">
+        <span class="toast-icon">✅</span>
+        <div class="toast-content">
+            <div class="toast-title">Success!</div>
+            <div class="toast-message">Study entry saved</div>
+        </div>
+    </div>
+
+    <!-- Date Entries Modal -->
+    <div class="modal" id="dateEntriesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Study Entries</h2>
+                <button class="modal-close" id="modalClose">×</button>
+            </div>
+            <div class="modal-date" id="modalDate"></div>
+            <div id="modalEntriesList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let entries = [];
+        let selectedMood = null;
+        let selectedMoodValue = null;
+        let currentDate = new Date();
+        let selectedEntryDate = new Date().toISOString().split('T')[0];
+
+        const moodEmojis = {
+            1: '😢',
+            2: '😔',
+            3: '😐',
+            4: '🙂',
+            5: '😊'
+        };
+
+        // Theme management
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            themeIcon.textContent = isDark ? '☀️' : '🌙';
+            themeText.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light Mode';
+            }
+        }
+
+        themeToggle.addEventListener('click', toggleTheme);
+
+        // Fix date handling for local timezone
+        function getLocalDateString(dateStr) {
+            const date = new Date(dateStr);
+            const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+            return localDate.toISOString().split('T')[0];
+        }
+
+        // Initialize date input limits (30 days back to 10 days ahead)
+        function initDateLimits() {
+            const dateInput = document.getElementById('entryDate');
+            const today = new Date();
+            
+            // Set min date to 30 days ago
+            const minDate = new Date(today);
+            minDate.setDate(today.getDate() - 30);
+            dateInput.min = getLocalDateString(minDate);
+            
+            // Set max date to 10 days from today
+            const maxDate = new Date(today);
+            maxDate.setDate(today.getDate() + 10);
+            dateInput.max = getLocalDateString(maxDate);
+            
+            // Set default to today
+            dateInput.value = getLocalDateString(today);
+            selectedEntryDate = dateInput.value;
+            
+            // Update entry counter
+            updateEntryCounter();
+        }
+
+        // Update entry counter
+        function updateEntryCounter() {
+            const dateInput = document.getElementById('entryDate');
+            const selectedDate = dateInput.value;
+            
+            // Count entries for selected date
+            const entriesForDate = entries.filter(e => {
+                const entryDate = getLocalDateString(e.date);
+                return entryDate === selectedDate;
+            });
+            
+            const counter = document.getElementById('entryCounter');
+            counter.textContent = `Study entries for ${formatDisplayDate(selectedDate)}: ${entriesForDate.length}/3`;
+            
+            // Show/hide warning
+            const warning = document.getElementById('maxEntriesWarning');
+            const saveBtn = document.getElementById('saveEntry');
+            if (entriesForDate.length >= 3) {
+                warning.style.display = 'block';
+                saveBtn.disabled = true;
+            } else {
+                warning.style.display = 'none';
+                saveBtn.disabled = false;
+            }
+        }
+
+        // Format date for display
+        function formatDisplayDate(dateStr) {
+            const date = new Date(dateStr);
+            const localDate = new Date(date.getTime() + (date.getTimezoneOffset() * 60000));
+            return localDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // Improved toast notification
+        let toastTimeout;
+        function showToast(title, message, isError = false) {
+            const toast = document.getElementById('saveToast');
+            const icon = toast.querySelector('.toast-icon');
+            const titleEl = toast.querySelector('.toast-title');
+            const messageEl = toast.querySelector('.toast-message');
+            
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            
+            if (isError) {
+                toast.classList.add('error');
+                icon.textContent = '❌';
+            } else {
+                toast.classList.remove('error');
+                icon.textContent = '✅';
+            }
+            
+            // Clear any existing timeout
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+                toast.classList.remove('show');
+            }
+            
+            // Show toast
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            // Hide after 3 seconds
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Load entries from localStorage
+        function loadEntries() {
+            const stored = localStorage.getItem('studyEntries');
+            if (stored) {
+                entries = JSON.parse(stored);
+            }
+        }
+
+        // Save entries to localStorage
+        function saveEntries() {
+            localStorage.setItem('studyEntries', JSON.stringify(entries));
+        }
+
+        // Initialize mood selector
+        document.querySelectorAll('.mood-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedMood = btn.dataset.mood;
+                selectedMoodValue = parseInt(btn.dataset.value);
+            });
+        });
+
+        // Date input change handler
+        document.getElementById('entryDate').addEventListener('change', function() {
+            selectedEntryDate = this.value;
+            updateEntryCounter();
+        });
+
+        // Save entry
+        document.getElementById('saveEntry').addEventListener('click', () => {
+            const subject = document.getElementById('studySubject').value.trim();
+            const notes = document.getElementById('studyNotes').value.trim();
+            const entryDate = document.getElementById('entryDate').value;
+            
+            if (!subject) {
+                showToast('Missing Information', 'Please enter what you studied!', true);
+                return;
+            }
+            
+            if (!selectedMood) {
+                showToast('Missing Rating', 'Please rate your productivity!', true);
+                return;
+            }
+
+            // Check max entries per day
+            const entriesForDate = entries.filter(e => {
+                const entryDateLocal = getLocalDateString(e.date);
+                return entryDateLocal === entryDate;
+            });
+            
+            if (entriesForDate.length >= 3) {
+                showToast('Limit Reached', 'Maximum 3 study entries per day!', true);
+                return;
+            }
+
+            // Create study entry
+            const now = new Date();
+            const entryDateTime = new Date(entryDate);
+            entryDateTime.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+            
+            const entry = {
+                id: Date.now(),
+                date: entryDateTime.toISOString(),
+                subject: subject,
+                mood: selectedMood,
+                moodValue: selectedMoodValue,
+                notes: notes
+            };
+
+            entries.unshift(entry);
+            saveEntries();
+            
+            // Animation effect
+            const saveBtn = document.getElementById('saveEntry');
+            saveBtn.classList.add('save-animation');
+            setTimeout(() => saveBtn.classList.remove('save-animation'), 800);
+            
+            // Show improved toast
+            showToast('Study Entry Saved!', `${subject} - ${formatDisplayDate(entryDate)}`);
+            
+            // Reset form
+            document.getElementById('studySubject').value = '';
+            document.getElementById('studyNotes').value = '';
+            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+            selectedMood = null;
+            selectedMoodValue = null;
+            
+            // Reset to today's date
+            document.getElementById('entryDate').value = getLocalDateString(new Date());
+            selectedEntryDate = document.getElementById('entryDate').value;
+
+            updateUI();
+        });
+
+        // Delete entry
+        function deleteEntry(id) {
+            if (confirm('Are you sure you want to delete this study entry?')) {
+                entries = entries.filter(e => e.id !== id);
+                saveEntries();
+                updateUI();
+                showToast('Entry Deleted', 'Study entry has been removed');
+            }
+        }
+
+        // Show entries for a specific date (modal)
+        function showDateEntries(dateStr) {
+            const entriesForDate = entries.filter(e => {
+                const entryDate = getLocalDateString(e.date);
+                return entryDate === dateStr;
+            });
+
+            if (entriesForDate.length === 0) {
+                showToast('No Entries', `No study entries for ${formatDisplayDate(dateStr)}`, true);
+                return;
+            }
+
+            const modal = document.getElementById('dateEntriesModal');
+            const modalDate = document.getElementById('modalDate');
+            const modalList = document.getElementById('modalEntriesList');
+
+            modalDate.textContent = formatDisplayDate(dateStr);
+            
+            modalList.innerHTML = entriesForDate.map(entry => {
+                const date = new Date(entry.date);
+                return `
+                    <div class="entry-item">
+                        <div class="entry-header">
+                            <div>
+                                <span class="entry-mood">${entry.mood}</span>
+                                ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                            <button class="delete-btn" onclick="deleteEntry(${entry.id}); document.getElementById('dateEntriesModal').classList.remove('show'); updateUI();">Delete</button>
+                        </div>
+                        <span class="entry-subject">${entry.subject}</span>
+                        ${entry.notes ? `<div class="entry-text">${entry.notes}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            modal.classList.add('show');
+        }
+
+        // Close modal
+        document.getElementById('modalClose').addEventListener('click', () => {
+            document.getElementById('dateEntriesModal').classList.remove('show');
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('dateEntriesModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('dateEntriesModal')) {
+                document.getElementById('dateEntriesModal').classList.remove('show');
+            }
+        });
+
+        // Render entries list
+        function renderEntries() {
+            const container = document.getElementById('entriesList');
+            
+            if (entries.length === 0) {
+                container.innerHTML = '<div class="no-entries" style="text-align: center; color: var(--text-light); padding: 40px; font-style: italic;">No study entries yet. Start tracking your learning journey! 📚</div>';
+                return;
+            }
+
+            container.innerHTML = entries.slice(0, 8).map(entry => {
+                const date = new Date(entry.date);
+                const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+                
+                return `
+                    <div class="entry-item">
+                        <div class="entry-header">
+                            <div>
+                                <span class="entry-mood">${entry.mood}</span>
+                                ${localDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                <span style="color: var(--text-light); font-size: 0.85rem; margin-left: 8px;">${localDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                            <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
+                        </div>
+                        <span class="entry-subject">${entry.subject}</span>
+                        ${entry.notes ? `<div class="entry-text">${entry.notes}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Calculate average productivity for timeframes
+        function calculateTimeframeAverages() {
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today);
+            thirtyDaysAgo.setDate(today.getDate() - 30);
+            
+            const ninetyDaysAgo = new Date(today);
+            ninetyDaysAgo.setDate(today.getDate() - 90);
+            
+            // Filter entries for last 30 days
+            const entries30Days = entries.filter(entry => {
+                const entryDate = new Date(entry.date);
+                return entryDate >= thirtyDaysAgo && entryDate <= today;
+            });
+            
+            // Filter entries for last 90 days
+            const entries90Days = entries.filter(entry => {
+                const entryDate = new Date(entry.date);
+                return entryDate >= ninetyDaysAgo && entryDate <= today;
+            });
+            
+            // Calculate averages
+            let avgMood30Days = '-';
+            let avgValue30Days = '-';
+            let avgMood90Days = '-';
+            let avgValue90Days = '-';
+            
+            if (entries30Days.length > 0) {
+                const avgValue = entries30Days.reduce((sum, e) => sum + e.moodValue, 0) / entries30Days.length;
+                const roundedAvg = Math.round(avgValue);
+                avgMood30Days = moodEmojis[roundedAvg] || moodEmojis[Math.floor(avgValue)];
+                avgValue30Days = avgValue.toFixed(1);
+            }
+            
+            if (entries90Days.length > 0) {
+                const avgValue = entries90Days.reduce((sum, e) => sum + e.moodValue, 0) / entries90Days.length;
+                const roundedAvg = Math.round(avgValue);
+                avgMood90Days = moodEmojis[roundedAvg] || moodEmojis[Math.floor(avgValue)];
+                avgValue90Days = avgValue.toFixed(1);
+            }
+            
+            // Update UI
+            document.getElementById('avgMood30Days').textContent = avgMood30Days;
+            document.getElementById('avgValue30Days').textContent = avgValue30Days;
+            document.getElementById('avgMood90Days').textContent = avgMood90Days;
+            document.getElementById('avgValue90Days').textContent = avgValue90Days;
+        }
+
+        // Render calendar
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const today = new Date();
+            const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+            
+            document.getElementById('currentMonth').textContent = 
+                currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            const container = document.getElementById('calendarDays');
+            container.innerHTML = '';
+
+            // Previous month days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const day = daysInPrevMonth - i;
+                const div = document.createElement('div');
+                div.className = 'calendar-day other-month';
+                div.innerHTML = `<span class="day-number">${day}</span>`;
+                container.appendChild(div);
+            }
+
+            // Current month days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateStart = date.getTime();
+                
+                // Get entries for this day
+                const dateStr = getLocalDateString(date.toISOString());
+                const dayEntries = entries.filter(e => {
+                    const entryDateStr = getLocalDateString(e.date);
+                    return entryDateStr === dateStr;
+                });
+                
+                const div = document.createElement('div');
+                div.className = 'calendar-day';
+                
+                // Check if today
+                if (dateStart === todayStart) {
+                    div.classList.add('today');
+                }
+                
+                if (dayEntries.length > 0) {
+                    div.classList.add('has-entry');
+                    const avgMood = Math.round(
+                        dayEntries.reduce((sum, e) => sum + e.moodValue, 0) / dayEntries.length
+                    );
+                    div.innerHTML = `
+                        <span class="day-number">${day}</span>
+                        <span class="day-mood">${moodEmojis[avgMood]}</span>
+                        ${dayEntries.length > 1 ? `<span class="entry-count">${dayEntries.length}</span>` : ''}
+                    `;
+                    
+                    // Click to view entries for this date
+                    div.addEventListener('click', () => {
+                        showDateEntries(dateStr);
+                    });
+                } else {
+                    div.innerHTML = `<span class="day-number">${day}</span>`;
+                    
+                    // Click to set date for new entry
+                    div.addEventListener('click', () => {
+                        document.getElementById('entryDate').value = dateStr;
+                        selectedEntryDate = dateStr;
+                        updateEntryCounter();
+                        showToast('Date Selected', `Ready to add entry for ${formatDisplayDate(dateStr)}`);
+                    });
+                }
+                
+                container.appendChild(div);
+            }
+
+            // Next month days
+            const totalCells = 42;
+            const remainingDays = totalCells - (firstDay + daysInMonth);
+            for (let day = 1; day <= remainingDays; day++) {
+                const div = document.createElement('div');
+                div.className = 'calendar-day other-month';
+                div.innerHTML = `<span class="day-number">${day}</span>`;
+                container.appendChild(div);
+            }
+        }
+
+        // Month navigation
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        });
+
+        // Update all UI elements
+        function updateUI() {
+            renderEntries();
+            calculateTimeframeAverages();
+            renderCalendar();
+            updateEntryCounter();
+        }
+
+        // Initialize
+        loadTheme();
+        loadEntries();
+        initDateLimits();
+        updateUI();
+
+        // Update entry counter when mood is selected
+        document.querySelectorAll('.mood-btn').forEach(btn => {
+            btn.addEventListener('click', updateEntryCounter);
+        });
+
+        // Focus on subject field when page loads
+        document.getElementById('studySubject').focus();
+    </script>
+</body>
+</html>

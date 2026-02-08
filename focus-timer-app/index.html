@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Timer | DevOps Study Group</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Light theme - Pastel colors with navy blue */
+            --bg-primary: #f8f9fb;
+            --bg-secondary: #eef1f6;
+            --bg-card: #ffffff;
+            --text-primary: #2d3436;
+            --text-secondary: #636e72;
+            --text-muted: #b2bec3;
+            --accent-primary: #6c8eef;
+            --accent-secondary: #4a6fa5;
+            --accent-success: #81ecec;
+            --accent-warning: #fdcb6e;
+            --border-color: #e3e8ef;
+            --shadow: rgba(108, 142, 239, 0.08);
+            --shadow-lg: rgba(108, 142, 239, 0.15);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1d23;
+            --bg-secondary: #242831;
+            --bg-card: #2d333d;
+            --text-primary: #e8eaed;
+            --text-secondary: #b8bdc6;
+            --text-muted: #6c7380;
+            --accent-primary: #7ba3f5;
+            --accent-secondary: #5681d8;
+            --accent-success: #55efc4;
+            --accent-warning: #fdcb6e;
+            --border-color: #3a404c;
+            --shadow: rgba(123, 163, 245, 0.15);
+            --shadow-lg: rgba(123, 163, 245, 0.25);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .theme-toggle {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            gap: 0.25rem;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-lg);
+        }
+
+        .theme-btn {
+            background: transparent;
+            border: none;
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .timer-section {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 4px 24px var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .timer-status {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: var(--bg-secondary);
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .timer-display {
+            font-size: 6rem;
+            font-weight: 300;
+            text-align: center;
+            margin: 0;
+            font-variant-numeric: tabular-nums;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px var(--shadow-lg);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-ring {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .progress-ring svg {
+            transform: rotate(-90deg);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .progress-ring-circle {
+            stroke: var(--border-color);
+            fill: none;
+            stroke-width: 8;
+        }
+
+        .progress-ring-progress {
+            stroke: url(#gradient);
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.75rem;
+            box-shadow: 0 4px 24px var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .settings-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .setting-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .setting-input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .setting-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(162, 155, 254, 0.1);
+        }
+
+        .sound-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .sound-btn {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.875rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .sound-btn:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }
+
+        .sound-btn.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-color: transparent;
+        }
+
+        .sound-icon {
+            font-size: 1.25rem;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .timer-display {
+                font-size: 4rem;
+            }
+            
+            .timer-controls {
+                flex-direction: column;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .timer-section {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">⏱️</div>
+                <h1>Focus Timer</h1>
+            </div>
+            <div class="theme-toggle">
+                <button class="theme-btn active" data-theme="light">☀️ Light</button>
+                <button class="theme-btn" data-theme="dark">🌙 Dark</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="timer-section">
+                <div class="timer-status">
+                    <div class="status-badge" id="statusBadge">Ready to Focus</div>
+                </div>
+
+                <div class="progress-ring">
+                    <svg width="300" height="300">
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#6c8eef;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#4a6fa5;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="progress-ring-circle" cx="150" cy="150" r="140" />
+                        <circle class="progress-ring-progress" id="progressCircle" cx="150" cy="150" r="140" 
+                                stroke-dasharray="879.646" stroke-dashoffset="0" />
+                    </svg>
+                    <div class="timer-display" id="timerDisplay">25:00</div>
+                </div>
+
+                <div class="timer-controls">
+                    <button class="btn btn-primary" id="startBtn">
+                        <span>▶️ Start</span>
+                    </button>
+                    <button class="btn btn-secondary" id="pauseBtn" style="display: none;">
+                        <span>⏸️ Pause</span>
+                    </button>
+                    <button class="btn btn-secondary" id="resetBtn">
+                        <span>🔄 Reset</span>
+                    </button>
+                    <button class="btn btn-secondary" id="skipBtn">
+                        <span>⏭️ Skip</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="card">
+                    <h3 class="card-title">⚙️ Timer Settings</h3>
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label class="setting-label">Focus Duration (minutes)</label>
+                            <input type="number" class="setting-input" id="workDuration" value="25" min="1" max="60">
+                        </div>
+                        <div class="setting-item">
+                            <label class="setting-label">Short Break (minutes)</label>
+                            <input type="number" class="setting-input" id="breakDuration" value="5" min="1" max="30">
+                        </div>
+                        <div class="setting-item">
+                            <label class="setting-label">Long Break (minutes)</label>
+                            <input type="number" class="setting-input" id="longBreakDuration" value="15" min="5" max="60">
+                        </div>
+                        <div class="setting-item">
+                            <label class="setting-label">Sessions before long break</label>
+                            <input type="number" class="setting-input" id="sessionsBeforeLongBreak" value="4" min="2" max="10">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">🎵 Ambient Sounds</h3>
+                    <div class="sound-grid">
+                        <button class="sound-btn" data-sound="lofi">
+                            <span class="sound-icon">🎹</span>
+                            <span>Lofi Jazz</span>
+                        </button>
+                        <button class="sound-btn" data-sound="coffee">
+                            <span class="sound-icon">☕</span>
+                            <span>Coffee Shop</span>
+                        </button>
+                        <button class="sound-btn" data-sound="hotel">
+                            <span class="sound-icon">🏨</span>
+                            <span>Hotel Lobby</span>
+                        </button>
+                        <button class="sound-btn" data-sound="rain">
+                            <span class="sound-icon">🌧️</span>
+                            <span>Gentle Rain</span>
+                        </button>
+                        <button class="sound-btn" data-sound="nature">
+                            <span class="sound-icon">🌿</span>
+                            <span>Nature Sounds</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">📊 Today's Progress</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Completed Sessions</span>
+                            <span class="stat-value" id="completedSessions">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Focus Time</span>
+                            <span class="stat-value" id="totalFocusTime">0m</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Current Streak</span>
+                            <span class="stat-value" id="currentStreak">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            Let's Go!! • You Can Do It!
+        </footer>
+    </div>
+
+    <script>
+        // Ambient sound generator using Web Audio API
+        class AmbientSoundGenerator {
+            constructor() {
+                this.context = null;
+                this.nodes = [];
+                this.type = null;
+            }
+
+            start(type) {
+                this.stop();
+                this.type = type;
+                this.context = new (window.AudioContext || window.webkitAudioContext)();
+                
+                switch(type) {
+                    case 'rain':
+                        this.generateRain();
+                        break;
+                    case 'nature':
+                        this.generateNature();
+                        break;
+                    case 'coffee':
+                        this.generateCoffeeShop();
+                        break;
+                    case 'lofi':
+                        this.generateLofi();
+                        break;
+                    case 'hotel':
+                        this.generateHotelLobby();
+                        break;
+                }
+            }
+
+            generateRain() {
+                // White noise filtered to sound like rain
+                const bufferSize = 2 * this.context.sampleRate;
+                const noiseBuffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+                
+                const whiteNoise = this.context.createBufferSource();
+                whiteNoise.buffer = noiseBuffer;
+                whiteNoise.loop = true;
+                
+                const filter = this.context.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 800;
+                filter.Q.value = 0.5;
+                
+                const gainNode = this.context.createGain();
+                gainNode.gain.value = 0.15;
+                
+                whiteNoise.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(this.context.destination);
+                
+                whiteNoise.start();
+                this.nodes = [whiteNoise, filter, gainNode];
+            }
+
+            generateNature() {
+                // Birds chirping + gentle breeze
+                const createBirdChirp = () => {
+                    const osc = this.context.createOscillator();
+                    const gain = this.context.createGain();
+                    
+                    const startFreq = 2000 + Math.random() * 1000;
+                    osc.frequency.setValueAtTime(startFreq, this.context.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(startFreq * 0.5, this.context.currentTime + 0.2);
+                    
+                    gain.gain.setValueAtTime(0, this.context.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.05, this.context.currentTime + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.context.currentTime + 0.3);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.context.destination);
+                    
+                    osc.start();
+                    osc.stop(this.context.currentTime + 0.3);
+                    
+                    setTimeout(createBirdChirp, 2000 + Math.random() * 3000);
+                };
+                
+                createBirdChirp();
+                
+                // Gentle wind
+                const bufferSize = this.context.sampleRate;
+                const noiseBuffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = (Math.random() * 2 - 1) * 0.1;
+                }
+                
+                const wind = this.context.createBufferSource();
+                wind.buffer = noiseBuffer;
+                wind.loop = true;
+                
+                const windGain = this.context.createGain();
+                windGain.gain.value = 0.08;
+                
+                wind.connect(windGain);
+                windGain.connect(this.context.destination);
+                wind.start();
+                
+                this.nodes = [wind, windGain];
+            }
+
+            generateCoffeeShop() {
+                // Murmur of conversation + occasional clinks
+                const bufferSize = 2 * this.context.sampleRate;
+                const noiseBuffer = this.context.createBuffer(2, bufferSize, this.context.sampleRate);
+                
+                for (let channel = 0; channel < 2; channel++) {
+                    const output = noiseBuffer.getChannelData(channel);
+                    for (let i = 0; i < bufferSize; i++) {
+                        output[i] = Math.random() * 2 - 1;
+                    }
+                }
+                
+                const murmur = this.context.createBufferSource();
+                murmur.buffer = noiseBuffer;
+                murmur.loop = true;
+                
+                const filter = this.context.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 500;
+                filter.Q.value = 1;
+                
+                const gain = this.context.createGain();
+                gain.gain.value = 0.08;
+                
+                murmur.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.context.destination);
+                murmur.start();
+                
+                // Occasional clinks
+                const createClink = () => {
+                    const osc = this.context.createOscillator();
+                    const oscGain = this.context.createGain();
+                    
+                    osc.frequency.value = 2000 + Math.random() * 1000;
+                    oscGain.gain.setValueAtTime(0.1, this.context.currentTime);
+                    oscGain.gain.exponentialRampToValueAtTime(0.001, this.context.currentTime + 0.1);
+                    
+                    osc.connect(oscGain);
+                    oscGain.connect(this.context.destination);
+                    
+                    osc.start();
+                    osc.stop(this.context.currentTime + 0.1);
+                    
+                    setTimeout(createClink, 3000 + Math.random() * 7000);
+                };
+                
+                createClink();
+                
+                this.nodes = [murmur, filter, gain];
+            }
+
+            generateLofi() {
+                // Mellow jazz-like tones
+                const frequencies = [
+                    { freq: 196, gain: 0.03 },  // G3
+                    { freq: 246.94, gain: 0.025 }, // B3
+                    { freq: 293.66, gain: 0.02 }, // D4
+                    { freq: 392, gain: 0.015 }    // G4
+                ];
+                
+                frequencies.forEach(({ freq, gain: gainVal }) => {
+                    const osc = this.context.createOscillator();
+                    const gain = this.context.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.value = gainVal;
+                    
+                    // Add slight vibrato
+                    const vibrato = this.context.createOscillator();
+                    const vibratoGain = this.context.createGain();
+                    vibrato.frequency.value = 5;
+                    vibratoGain.gain.value = 2;
+                    
+                    vibrato.connect(vibratoGain);
+                    vibratoGain.connect(osc.frequency);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.context.destination);
+                    
+                    osc.start();
+                    vibrato.start();
+                    
+                    this.nodes.push(osc, gain, vibrato, vibratoGain);
+                });
+            }
+
+            generateHotelLobby() {
+                // Soft ambient pad
+                const frequencies = [130.81, 164.81, 196.00, 246.94]; // C3, E3, G3, B3
+                
+                frequencies.forEach(freq => {
+                    const osc = this.context.createOscillator();
+                    const gain = this.context.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.value = 0.015;
+                    
+                    osc.connect(gain);
+                    gain.connect(this.context.destination);
+                    
+                    osc.start();
+                    this.nodes.push(osc, gain);
+                });
+                
+                // Very subtle pink noise
+                const bufferSize = this.context.sampleRate;
+                const noiseBuffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                
+                let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+                for (let i = 0; i < bufferSize; i++) {
+                    const white = Math.random() * 2 - 1;
+                    b0 = 0.99886 * b0 + white * 0.0555179;
+                    b1 = 0.99332 * b1 + white * 0.0750759;
+                    b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856;
+                    b4 = 0.55000 * b4 + white * 0.5329522;
+                    b5 = -0.7616 * b5 - white * 0.0168980;
+                    output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+                    b6 = white * 0.115926;
+                }
+                
+                const noise = this.context.createBufferSource();
+                noise.buffer = noiseBuffer;
+                noise.loop = true;
+                
+                const noiseGain = this.context.createGain();
+                noiseGain.gain.value = 0.05;
+                
+                noise.connect(noiseGain);
+                noiseGain.connect(this.context.destination);
+                noise.start();
+                
+                this.nodes.push(noise, noiseGain);
+            }
+
+            stop() {
+                this.nodes.forEach(node => {
+                    try {
+                        if (node.stop) node.stop();
+                        if (node.disconnect) node.disconnect();
+                    } catch (e) {}
+                });
+                this.nodes = [];
+                
+                if (this.context) {
+                    this.context.close();
+                    this.context = null;
+                }
+                this.type = null;
+            }
+
+            pause() {
+                if (this.context) {
+                    this.context.suspend();
+                }
+            }
+
+            resume() {
+                if (this.context) {
+                    this.context.resume();
+                }
+            }
+        }
+
+        const ambientSound = new AmbientSoundGenerator();
+        let activeSound = null;
+
+        // Theme toggle
+        const themeBtns = document.querySelectorAll('.theme-btn');
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
+        themeBtns.forEach(btn => {
+            if (btn.dataset.theme === currentTheme) {
+                btn.classList.add('active');
+            }
+            
+            btn.addEventListener('click', () => {
+                const theme = btn.dataset.theme;
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                
+                themeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Timer state
+        let timerState = {
+            mode: 'work',
+            timeLeft: 25 * 60,
+            isRunning: false,
+            interval: null,
+            sessionsCompleted: 0,
+            totalFocusTime: 0,
+            currentStreak: 0
+        };
+
+        // DOM elements
+        const timerDisplay = document.getElementById('timerDisplay');
+        const statusBadge = document.getElementById('statusBadge');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const skipBtn = document.getElementById('skipBtn');
+        const progressCircle = document.getElementById('progressCircle');
+
+        const workDurationInput = document.getElementById('workDuration');
+        const breakDurationInput = document.getElementById('breakDuration');
+        const longBreakDurationInput = document.getElementById('longBreakDuration');
+        const sessionsBeforeLongBreakInput = document.getElementById('sessionsBeforeLongBreak');
+
+        const completedSessionsEl = document.getElementById('completedSessions');
+        const totalFocusTimeEl = document.getElementById('totalFocusTime');
+        const currentStreakEl = document.getElementById('currentStreak');
+
+        // Load saved data
+        function loadSavedData() {
+            const saved = localStorage.getItem('pomodoroData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                const today = new Date().toDateString();
+                
+                if (data.date === today) {
+                    timerState.sessionsCompleted = data.sessionsCompleted || 0;
+                    timerState.totalFocusTime = data.totalFocusTime || 0;
+                    timerState.currentStreak = data.currentStreak || 0;
+                    updateStats();
+                }
+            }
+        }
+
+        function saveData() {
+            const data = {
+                date: new Date().toDateString(),
+                sessionsCompleted: timerState.sessionsCompleted,
+                totalFocusTime: timerState.totalFocusTime,
+                currentStreak: timerState.currentStreak
+            };
+            localStorage.setItem('pomodoroData', JSON.stringify(data));
+        }
+
+        // Timer functions
+        function updateDisplay() {
+            const minutes = Math.floor(timerState.timeLeft / 60);
+            const seconds = timerState.timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const totalTime = getDuration() * 60;
+            const progress = (totalTime - timerState.timeLeft) / totalTime;
+            const circumference = 2 * Math.PI * 140;
+            const offset = circumference * (1 - progress);
+            progressCircle.style.strokeDashoffset = offset;
+        }
+
+        function getDuration() {
+            if (timerState.mode === 'work') return parseInt(workDurationInput.value);
+            if (timerState.mode === 'break') return parseInt(breakDurationInput.value);
+            return parseInt(longBreakDurationInput.value);
+        }
+
+        function updateStatus() {
+            const statuses = {
+                work: '🎯 Focus Time',
+                break: '☕ Short Break',
+                longBreak: '🌟 Long Break'
+            };
+            statusBadge.textContent = statuses[timerState.mode];
+        }
+
+        function updateStats() {
+            completedSessionsEl.textContent = timerState.sessionsCompleted;
+            totalFocusTimeEl.textContent = `${timerState.totalFocusTime}m`;
+            currentStreakEl.textContent = timerState.currentStreak;
+        }
+
+        function startTimer() {
+            if (!timerState.isRunning) {
+                timerState.isRunning = true;
+                startBtn.style.display = 'none';
+                pauseBtn.style.display = 'flex';
+                
+                // Start ambient sound if one is selected
+                if (activeSound) {
+                    ambientSound.resume();
+                }
+                
+                timerState.interval = setInterval(() => {
+                    timerState.timeLeft--;
+                    
+                    if (timerState.timeLeft <= 0) {
+                        completeSession();
+                    }
+                    
+                    updateDisplay();
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            timerState.isRunning = false;
+            clearInterval(timerState.interval);
+            startBtn.style.display = 'flex';
+            pauseBtn.style.display = 'none';
+            
+            // Pause ambient sound
+            ambientSound.pause();
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timerState.timeLeft = getDuration() * 60;
+            updateDisplay();
+        }
+
+        function skipSession() {
+            completeSession();
+        }
+
+        function playCompletionChime() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+            
+            notes.forEach((freq, index) => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = freq;
+                oscillator.type = 'sine';
+                
+                const startTime = audioContext.currentTime + (index * 0.15);
+                gainNode.gain.setValueAtTime(0, startTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 1.5);
+                
+                oscillator.start(startTime);
+                oscillator.stop(startTime + 1.5);
+            });
+        }
+
+        function completeSession() {
+            pauseTimer();
+            
+            // Play completion chime
+            playCompletionChime();
+            
+            if (timerState.mode === 'work') {
+                timerState.sessionsCompleted++;
+                timerState.totalFocusTime += getDuration();
+                timerState.currentStreak++;
+                
+                const sessionsBeforeLong = parseInt(sessionsBeforeLongBreakInput.value);
+                if (timerState.sessionsCompleted % sessionsBeforeLong === 0) {
+                    timerState.mode = 'longBreak';
+                } else {
+                    timerState.mode = 'break';
+                }
+            } else {
+                timerState.mode = 'work';
+            }
+            
+            timerState.timeLeft = getDuration() * 60;
+            updateDisplay();
+            updateStatus();
+            updateStats();
+            saveData();
+            
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('Timer Complete!', {
+                    body: timerState.mode === 'work' ? 'Time to focus!' : 'Take a break!',
+                    icon: '⏱️'
+                });
+            }
+        }
+
+        // Sound button handlers
+        const soundBtns = document.querySelectorAll('.sound-btn');
+        soundBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const soundKey = btn.dataset.sound;
+                
+                if (activeSound === soundKey) {
+                    activeSound = null;
+                    ambientSound.stop();
+                    soundBtns.forEach(b => b.classList.remove('active'));
+                } else {
+                    activeSound = soundKey;
+                    soundBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    ambientSound.start(soundKey);
+                    if (!timerState.isRunning) {
+                        ambientSound.pause();
+                    }
+                }
+            });
+        });
+
+        // Event listeners
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        skipBtn.addEventListener('click', skipSession);
+
+        [workDurationInput, breakDurationInput, longBreakDurationInput].forEach(input => {
+            input.addEventListener('change', () => {
+                if (!timerState.isRunning) {
+                    timerState.timeLeft = getDuration() * 60;
+                    updateDisplay();
+                }
+            });
+        });
+
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // Initialize
+        loadSavedData();
+        updateDisplay();
+        updateStatus();
+        updateStats();
+    </script>
+</body>
+</html>
