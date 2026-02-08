@@ -97,7 +97,7 @@ jobs:
       # ---------------------------
       - name: Update kubeconfig
         run: |
-          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} --role-arn ${{ secrets.AWS_ROLE_ARN_OIDC }}
+          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} 
 
       # ---------------------------
       # Deploy to EKS
@@ -109,8 +109,4 @@ jobs:
             kubectl apply -f ./focus-timer-app/focus-service.yaml -n focus
             kubectl get all -n focus
 
-        #   kubectl set image deployment/${{ env.K8S_DEPLOYMENT }} \
-        #     ${{ env.K8S_CONTAINER }}=${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }} \
-        #     -n ${{ env.K8S_NAMESPACE }}
-        #   kubectl rollout status deployment/${{ env.K8S_DEPLOYMENT }} -n ${{ env.K8S_NAMESPACE }}
-        #   kubectl get pods -l app=${{ env.K8S_CONTAINER }} -n ${{ env.K8S_NAMESPACE }}
+    
