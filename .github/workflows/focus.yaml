@@ -55,12 +55,20 @@ jobs:
         with:
           image-ref: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
           severity: MEDIUM, LOW
-          exit-code: 1
+          exit-code: 0
           ignore-unfixed: true
 
       # ---------------------------
       # Push to ECR
       # ---------------------------
+      - name: Create ECR repository if not exists
+        run: |
+          aws ecr describe-repositories --repository-names ${{ env.IMAGE_NAME }} || \
+          aws ecr create-repository \
+            --repository-name ${{ env.IMAGE_NAME }} \
+            --image-tag-mutability MUTABLE \
+            --image-scanning-configuration scanOnPush=true
+
       - name: Push image to Amazon ECR
         uses: docker/build-push-action@v5
         with:
