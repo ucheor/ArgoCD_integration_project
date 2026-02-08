@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: focus-service
+  labels:
+    app: focus
+spec:
+  type: LoadBalancer
+  selector:
+    app: focus
+  ports:
+    - protocol: TCP
+      port: 80        # The port exposed to external users
+      targetPort: 80  # The port on the container (from Docker Build image)
+

@@ -14,9 +14,12 @@ env:
   AWS_REGION: us-east-1
   IMAGE_NAME: focus
   ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+  K8S_DEPLOYMENT: focus-deployment
+  K8S_CONTAINER: focus
+  K8S_NAMESPACE: default  # adjust if using another namespace
 
 jobs:
-  build-scan-push:
+  build-scan-push-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -44,8 +47,7 @@ jobs:
           context: ./focus-timer-app/
           push: false
           load: true
-          tags: |
-            ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+          tags: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
 
       # ---------------------------
       # Trivy Image Scan
@@ -77,3 +79,32 @@ jobs:
           tags: |
             ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
             ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+      # ---------------------------
+      # Setup Kubectl
+      # ---------------------------
+      - name: Setup Kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.29.0'
+
+      # ---------------------------
+      # Update kubeconfig (EKS)
+      # ---------------------------
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      # ---------------------------
+      # Deploy to EKS
+      # ---------------------------
+      - name: Deploy to EKS
+        run: |
+            kubectl apply -f ./focus-timer-app/focus-deployment.yaml
+            kubectl apply -f ./focus-timer-app/focus-service.yaml
+
+        #   kubectl set image deployment/${{ env.K8S_DEPLOYMENT }} \
+        #     ${{ env.K8S_CONTAINER }}=${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }} \
+        #     -n ${{ env.K8S_NAMESPACE }}
+        #   kubectl rollout status deployment/${{ env.K8S_DEPLOYMENT }} -n ${{ env.K8S_NAMESPACE }}
+        #   kubectl get pods -l app=${{ env.K8S_CONTAINER }} -n ${{ env.K8S_NAMESPACE }}
