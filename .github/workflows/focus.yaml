@@ -21,7 +21,7 @@ env:
   SERVICE_TYPE: LoadBalancer    # note capitalization ---> options are LoadBalancer, ClusterIP 
   SERVICE_PORT: 80              # ***update ---> It is the port external users hit on the Load Balancer
   REPLICAS: 2
-  APPLICATION_REPO: ./focus-timer-app/
+  APPLICATION_REPO: focus-timer-app/
 
 jobs:
   build-scan-push-deploy:
