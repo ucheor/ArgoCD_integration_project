@@ -67,7 +67,7 @@ jobs:
           project: ${{ env.APP_NAME }}
           path: ${{ env.APPLICATION_REPO }}
           format: 'HTML'
-          out: 'reports'
+          out: '${{ env.APPLICATION_REPO}}reports'
 
       - name: Upload Report
         uses: actions/upload-artifact@v4
