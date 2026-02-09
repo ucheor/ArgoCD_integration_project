@@ -5,7 +5,7 @@ metadata:
   labels:
     app: ${{ env.APP_NAME }}
 spec:
-  replicas: ${{ env.REPLICAS }}
+  replicas: 2
   selector:
     matchLabels:
       app: ${{ env.APP_NAME }}
@@ -19,4 +19,5 @@ spec:
           image: ${{ secrets.ECR_REGISTRY }}/${{ APP_NAME }}:${{ github.run_number }}
           ports:
             - containerPort: ${{ env.CONTAINER_PORT }}
+
 
