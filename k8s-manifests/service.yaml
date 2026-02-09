@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: ${{ env.APP_NAME }}-service
+  name: ${APP_NAME}-service
   labels:
-    app: ${{ env.APP_NAME }}
+    app: ${APP_NAME}
 spec:
-  type: ${{ env.SERVICE_TYPE }}
+  type: ${SERVICE_TYPE}
   selector:
-    app: ${{ env.APP_NAME }}
+    app: ${APP_NAME}
   ports:
     - protocol: TCP
-      port: 80        # "Service Port." It is the port external users hit on the Load Balancer
-      targetPort: 80  # The port exposed on your image (from Docker Build image) - port where your application is listening inside the container - ContainerPort
+      port: ${SERVICE_PORT}        # "Service Port." It is the port external users hit on the Load Balancer
+      targetPort: ${CONTAINER_PORT}  # The port exposed on your image (from Docker Build image) - port where your application is listening inside the container - ContainerPort
 

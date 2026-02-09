@@ -18,10 +18,10 @@ env:
   APP_NAME: focus                             #updated ---> app name = image name = ECR repo name = namespace ***
   ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}   #updated ---> added complete AWS_registry value ***
   EKS_CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
-  #CONTAINER_PORT: 80            #same as LoadBalancer targetPort - which port is exposed on your image - check EXPOSE in Dockerfile - or comfirm default port
+  CONTAINER_PORT: 80            #same as LoadBalancer targetPort - which port is exposed on your image - check EXPOSE in Dockerfile - or comfirm default port
   SERVICE_TYPE: LoadBalancer    #note capitalization ---> options are LoadBalancer, ClusterIP 
-  #SERVICE_PORT: 80              #It is the port external users hit on the Load Balancer
-
+  SERVICE_PORT: 80              #It is the port external users hit on the Load Balancer
+  REPLICAS: 2
 
 jobs:
   build-scan-push-deploy:
@@ -113,16 +113,27 @@ jobs:
       # ---------------------------
       - name: Deploy to EKS
         run: |
-            # 1. Print current location and list files to debug path issues
-            echo "Current Dir: $(pwd)"
-            ls -R
+            # 1. Map GitHub environment variables to Shell variables for envsubst
+            export APP_NAME=${{ env.APP_NAME }}
+            export REPLICAS=${{ env.REPLICAS }}
+            export ECR_REGISTRY=${{ env.ECR_REGISTRY }}
+            export CONTAINER_PORT=${{ env.CONTAINER_PORT }}
+            export SERVICE_TYPE=${{ env.SERVICE_TYPE }}
+            export SERVICE_PORT=${{ env.SERVICE_PORT }}
+            export IMAGE_TAG=${{ github.run_number }}
 
-            kubectl get namespace ${{ env.APP_NAME }} || kubectl create namespace ${{ env.APP_NAME }}
-            kubectl apply -f k8s-manifests/deployment.yaml -n ${{ env.APP_NAME }}
-            kubectl apply -f k8s-manifests/service.yaml -n ${{ env.APP_NAME }}
+            # 2. Create namespace if missing
+            kubectl get namespace ${APP_NAME} || kubectl create namespace $APP_NAME
+
+            # 3. Use envsubst to swap variables and pipe to kubectl ---> The '-' tells kubectl to read the result of envsubst
+            envsubst < ./k8s-manifests/deployment.yaml | kubectl apply -f - -n $APP_NAME
+            envsubst < ./k8s-manifests/service.yaml | kubectl apply -f - -n $APP_NAME
             
-            # Wait a moment for the ELB to be assigned by AWS
+            # 4. Wait a moment for the ELB to be assigned by AWS
             echo "Waiting for Load Balancer DNS..."
             sleep 10
-            kubectl get pods -n ${{ env.APP_NAME }}
-            kubectl get svc -n ${{ env.APP_NAME }}
+            kubectl get pods -n $APP_NAME
+            kubectl get svc -n $APP_NAME
+
+        # kubectl apply -f k8s-manifests/deployment.yaml -n ${{ env.APP_NAME }}
+        # kubectl apply -f k8s-manifests/service.yaml -n ${{ env.APP_NAME }}
