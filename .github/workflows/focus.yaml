@@ -162,11 +162,11 @@ jobs:
             sleep 10
             echo "If Load Balancer DNS...Remember to allow up to 2 minutes for your LoadBalancer to be provisioned and available..."
             sleep 3
-            Here is a list of pods in $APP_NAME namespace...
+            echo "Here is a list of pods in $APP_NAME namespace..."
             echo ""
             kubectl get pods -n $APP_NAME
             sleep 2
-            Here is a list of services in $APP_NAME namespace...
+            echo "Here is a list of services in $APP_NAME namespace..."
             echo ""
             kubectl get svc -n $APP_NAME
             
