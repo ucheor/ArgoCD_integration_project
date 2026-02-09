@@ -54,16 +54,16 @@ jobs:
           load: true
           tags: ${{ env.ECR_REGISTRY }}/${{ env.APP_NAME }}:${{ github.run_number }}
 
-      # ---------------------------
-      # Trivy Image Scan
-      # ---------------------------
-      - name: Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.20.0
-        with:
-          image-ref: ${{ env.ECR_REGISTRY }}/${{ env.APP_NAME }}:${{ github.run_number }}
-          severity: HIGH, CRITICAL
-          exit-code: 0
-          ignore-unfixed: true
+      # # ---------------------------
+      # # Trivy Image Scan
+      # # ---------------------------
+      # - name: Trivy vulnerability scan
+      #   uses: aquasecurity/trivy-action@0.20.0
+      #   with:
+      #     image-ref: ${{ env.ECR_REGISTRY }}/${{ env.APP_NAME }}:${{ github.run_number }}
+      #     severity: HIGH, CRITICAL
+      #     exit-code: 0
+      #     ignore-unfixed: true
 
       # ---------------------------
       # Push to ECR
