@@ -3,8 +3,10 @@ name: Restaurant Menu App Build
 on:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
+  # pull_request:
+  #   branches: ["main"]
+  # paths:              #adjust Dockerfile build context if this is in use
+  #   - restaurant-menu-app/**
 
 permissions:
   id-token: write   # REQUIRED for OIDC

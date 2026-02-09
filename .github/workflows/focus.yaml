@@ -3,8 +3,10 @@ name: Focus Timer App Build
 on:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
+  # pull_request:
+  #   branches: ["main"]
+  # paths:              #adjust Dockerfile build context if this is in use
+  #   - ${{ env.APP_NAME }}-timer-app/**
 
 permissions:
   id-token: write   # REQUIRED for OIDC
@@ -13,11 +15,9 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  IMAGE_NAME: focus
-  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-  K8S_DEPLOYMENT: focus-deployment
-  K8S_CONTAINER: focus
-  K8S_NAMESPACE: default  # adjust if using another namespace
+  APP_NAME: focus        #updated ---> app name = image name = ECR repo name = namespace ***
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}   #updated ---> added complete AWS_registry value ***
+  EKS_CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
 
 jobs:
   build-scan-push-deploy:
@@ -34,23 +34,14 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_OIDC }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          #aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          #aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
-        # run: |
-        #   # Configure AWS CLI with IAM user credentials
-        #   aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-        #   aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        #   aws configure set region ${{ env.AWS_REGION }}
-        #   aws configure set output json
-
+      
 
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
-
-    
 
       # ---------------------------
       # Build Docker Image
@@ -58,10 +49,10 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./focus-timer-app/
+          context: ./${{ env.APP_NAME }}-timer-app/
           push: false
           load: true
-          tags: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+          tags: ${{ env.ECR_REGISTRY }}/${{ env.APP_NAME }}:${{ github.run_number }}
 
       # ---------------------------
       # Trivy Image Scan
@@ -69,7 +60,7 @@ jobs:
       - name: Trivy vulnerability scan
         uses: aquasecurity/trivy-action@0.20.0
         with:
-          image-ref: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+          image-ref: ${{ env.ECR_REGISTRY }}/${{ env.APP_NAME }}:${{ github.run_number }}
           severity: HIGH, CRITICAL
           exit-code: 0
           ignore-unfixed: true
@@ -79,20 +70,20 @@ jobs:
       # ---------------------------
       - name: Create ECR repository if not exists
         run: |
-          aws ecr describe-repositories --repository-names ${{ env.IMAGE_NAME }} || \
+          aws ecr describe-repositories --repository-names ${{ env.APP_NAME }} || \
           aws ecr create-repository \
-            --repository-name ${{ env.IMAGE_NAME }} \
+            --repository-name ${{ env.APP_NAME }} \
             --image-tag-mutability MUTABLE \
             --image-scanning-configuration scanOnPush=true
 
       - name: Push image to Amazon ECR
         uses: docker/build-push-action@v5
         with:
-          context: ./focus-timer-app/
+          context: ./${{ env.APP_NAME }}-timer-app/
           push: true
           tags: |
-            ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
-            ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.ECR_REGISTRY }}/${{ env.APP_NAME }}:${{ github.run_number }}
+            ${{ env.ECR_REGISTRY }}/${{ env.APP_NAME }}:latest
 
       # ---------------------------
       # Setup Kubectl
@@ -105,18 +96,24 @@ jobs:
       # ---------------------------
       # Update kubeconfig (EKS)
       # ---------------------------
-      - name: Update kubeconfig
+      - name: Update Kubeconfig
         run: |
-          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} 
+          aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Verify Connection
+        run: |
+          kubectl get nodes 
 
       # ---------------------------
       # Deploy to EKS
       # ---------------------------
-      - name: Deploy to EKS
-        run: |
-            kubectl get namespace focus || kubectl create namespace focus
-            kubectl apply -f ./focus-timer-app/focus-deployment.yaml -n focus
-            kubectl apply -f ./focus-timer-app/focus-service.yaml -n focus
-            kubectl get all -n focus
+      # - name: Deploy to EKS
+      #   run: |
+      #       kubectl get namespace ${{ env.APP_NAME }} || kubectl create namespace ${{ env.APP_NAME }}
+      #       kubectl apply -f deployment.yaml -n ${{ env.APP_NAME }}
+      #       kubectl apply -f service.yaml -n ${{ env.APP_NAME }}
+      #       sleep 5
+      #       kubectl get pods -n ${{ env.APP_NAME }}
+      #       kubectl get svc -n ${{ env.APP_NAME }}
 
     
