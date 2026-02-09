@@ -160,14 +160,19 @@ jobs:
             # 4. Wait a moment for the ELB to be assigned by AWS
             echo "Waiting for Service to be provisioned..."
             sleep 10
+
             echo "If Load Balancer DNS...Remember to allow up to 2 minutes for your LoadBalancer to be provisioned and available..."
             sleep 3
+
+            echo "--------------------------------------------------"
             echo "Here is a list of pods in $APP_NAME namespace..."
-            echo ""
+            echo "--------------------------------------------------"
             kubectl get pods -n $APP_NAME
             sleep 2
+
+            echo "-----------------------------------------------------"
             echo "Here is a list of services in $APP_NAME namespace..."
-            echo ""
+            echo "-----------------------------------------------------"
             kubectl get svc -n $APP_NAME
             
         # ***Had to adjust as above since regular formating below was throwing an error with the manifest files
