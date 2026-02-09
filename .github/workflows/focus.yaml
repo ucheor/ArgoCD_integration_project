@@ -46,7 +46,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       # ---------------------------
-      # Job 1: Static Code Analysis (SonarQube)
+      # Static Code Analysis (SonarQube)
       # ---------------------------
   
       # - name: SonarQube Scan
@@ -58,7 +58,7 @@ jobs:
       #     projectBaseDir: ${{ env.APPLICATION_REPO }}
 
       # ---------------------------
-      # Job 2: Dependency Scanning (OWASP)
+      # OWASP Dependency Scanning (OWASP)
       # ---------------------------
   
       - name: Dependency Check
