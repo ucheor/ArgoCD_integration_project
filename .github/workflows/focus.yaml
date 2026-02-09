@@ -73,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dep-check-report
-          path: ${{ env.APPLICATION_REPO}}/reports
+          path: ${{ env.APPLICATION_REPO}}reports
 
       # ---------------------------
       # Build Docker Image
