@@ -120,8 +120,8 @@ jobs:
       - name: Deploy to EKS
         run: |
             kubectl get namespace ${{ env.APP_NAME }} || kubectl create namespace ${{ env.APP_NAME }}
-            kubectl apply -f ./k8s-manifests/deployment.yaml -n ${{ env.APP_NAME }}
-            kubectl apply -f ./k8s-manifests/service.yaml -n ${{ env.APP_NAME }}
+            envsubst < ./k8s-manifests/deployment.yaml | kubectl apply -f ./k8s-manifests/deployment.yaml -n ${{ env.APP_NAME }}
+            envsubst < ./k8s-manifests/deployment.yaml | kubectl apply -f ./k8s-manifests/service.yaml -n ${{ env.APP_NAME }}
             # Wait a moment for the ELB to be assigned by AWS
             echo "Waiting for Load Balancer DNS..."
             sleep 10
