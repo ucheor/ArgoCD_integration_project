@@ -15,9 +15,14 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  APP_NAME: focus        #updated ---> app name = image name = ECR repo name = namespace ***
+  APP_NAME: focus                             #updated ---> app name = image name = ECR repo name = namespace ***
   ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}   #updated ---> added complete AWS_registry value ***
   EKS_CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
+  REPLICAS: 2
+  CONTAINER_PORT: 80            #same as LoadBalancer targetPort - which port is exposed on your image - check EXPOSE in Dockerfile - or comfirm default port
+  SERVICE_TYPE: LoadBalancer    #note capitalization ---> options are LoadBalancer, ClusterIP 
+  SERVICE_PORT: 80              #It is the port external users hit on the Load Balancer
+
 
 jobs:
   build-scan-push-deploy:
@@ -107,13 +112,13 @@ jobs:
       # ---------------------------
       # Deploy to EKS
       # ---------------------------
-      # - name: Deploy to EKS
-      #   run: |
-      #       kubectl get namespace ${{ env.APP_NAME }} || kubectl create namespace ${{ env.APP_NAME }}
-      #       kubectl apply -f deployment.yaml -n ${{ env.APP_NAME }}
-      #       kubectl apply -f service.yaml -n ${{ env.APP_NAME }}
-      #       sleep 5
-      #       kubectl get pods -n ${{ env.APP_NAME }}
-      #       kubectl get svc -n ${{ env.APP_NAME }}
-
-    
+      - name: Deploy to EKS
+        run: |
+            kubectl get namespace ${{ env.APP_NAME }} || kubectl create namespace ${{ env.APP_NAME }}
+            kubectl apply -f k8s-manifests/deployment.yaml -n ${{ env.APP_NAME }}
+            kubectl apply -f k8s-manifests/service.yaml -n ${{ env.APP_NAME }}
+            # Wait a moment for the ELB to be assigned by AWS
+            echo "Waiting for Load Balancer DNS..."
+            sleep 10
+            kubectl get pods -n ${{ env.APP_NAME }}
+            kubectl get svc -n ${{ env.APP_NAME }}
