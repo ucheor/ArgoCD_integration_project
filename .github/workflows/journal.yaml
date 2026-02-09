@@ -3,10 +3,8 @@ name: Study Journal App Build
 on:
   push:
     branches: ["main"]
-  # pull_request:
-  #   branches: ["main"]
-  # paths:              #adjust Dockerfile build context if this is in use
-  #   - study-journal-app/**
+  pull_request:
+    branches: ["main"]
 
 permissions:
   id-token: write   # REQUIRED for OIDC
