@@ -109,6 +109,11 @@ jobs:
         run: |
           kubectl get nodes 
 
+      - name: Debug file structure
+        run: |
+          pwd
+          ls -R
+
       # ---------------------------
       # Deploy to EKS
       # ---------------------------
