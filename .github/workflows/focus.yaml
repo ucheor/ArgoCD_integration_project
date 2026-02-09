@@ -109,16 +109,15 @@ jobs:
         run: |
           kubectl get nodes 
 
-      - name: Debug file structure
-        run: |
-          pwd
-          ls -R
-
       # ---------------------------
       # Deploy to EKS
       # ---------------------------
       - name: Deploy to EKS
         run: |
+            # 1. Print current location and list files to debug path issues
+            echo "Current Dir: $(pwd)"
+            ls -R
+
             kubectl get namespace ${{ env.APP_NAME }} || kubectl create namespace ${{ env.APP_NAME }}
             envsubst < ./k8s-manifests/deployment.yaml | kubectl apply -f - -n ${{ env.APP_NAME }}
             envsubst < ./k8s-manifests/service.yaml | kubectl apply -f - -n ${{ env.APP_NAME }}
