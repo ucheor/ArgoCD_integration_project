@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${{ env.APP_NAME }}-deployment
+  labels:
+    app: ${{ env.APP_NAME }}
+spec:
+  replicas: ${{ env.REPLICAS }}
+  selector:
+    matchLabels:
+      app: ${{ env.APP_NAME }}
+  template:
+    metadata:
+      labels:
+        app: ${{ env.APP_NAME }}
+    spec:
+      containers:
+        - name: ${{ env.APP_NAME }}
+          image: ${{ secrets.ECR_REGISTRY }}/${{ APP_NAME }}:${{ github.run_number }}
+          ports:
+            - containerPort: ${{ env.CONTAINER_PORT }}
+
