@@ -120,7 +120,7 @@ jobs:
       # ---------------------------
       # Setup Kubectl
       # ---------------------------
-      - name: Setup Kubectl
+      - name: Setup Kubectl --
         uses: azure/setup-kubectl@v3
         with:
           version: 'v1.29.0'
