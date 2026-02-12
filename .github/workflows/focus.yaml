@@ -139,7 +139,7 @@ jobs:
       # ----------------------------
       # Deploy to EKS
       # ---------------------------
-      - name: Deploy to EKS
+      - name: Deploy to EKS..
         run: |
             # 1. Map GitHub environment variables to Shell variables for envsubst
             export APP_NAME=${{ env.APP_NAME }}
