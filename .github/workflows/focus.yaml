@@ -14,7 +14,7 @@ env:
   ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}   #updated ---> added complete AWS_registry value ***
   AWS_OIDC_ROLE_ARN: ${{ secrets.AWS_OIDC_ROLE_ARN}}
   CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
-  #review and update environment variables as needed
+  #review and update environment variables as needed.
   AWS_REGION: us-east-1         # should match cluster region
   APP_NAME: focus               # ***update ---> app name = image name = ECR repo name = namespace ***
   CONTAINER_PORT: 80            # ***update ---> same as LoadBalancer targetPort - which port is exposed on your image - check EXPOSE in Dockerfile - or comfirm default port
