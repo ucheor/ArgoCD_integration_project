@@ -132,9 +132,9 @@ jobs:
         run: |
           aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
-      - name: Verify Connection
-        run: |
-          kubectl get nodes 
+      # - name: Verify Connection
+      #   run: |
+      #     kubectl get nodes 
 
       # ----------------------------
       # Deploy to EKS
