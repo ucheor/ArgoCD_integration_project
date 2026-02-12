@@ -1,0 +1,180 @@
+name: Study Journal App Build       #update as appropriate
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  id-token: write   # REQUIRED for OIDC
+  contents: read
+
+
+env:
+  #confirm github repository secrets and variables are set up
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}   #updated ---> added complete AWS_registry value ***
+  AWS_OIDC_ROLE_ARN: ${{ secrets.AWS_OIDC_ROLE_ARN}}
+  CLUSTER_NAME: ${{ vars.CLUSTER_NAME }}
+  #review and update environment variables as needed.
+  AWS_REGION: us-east-1         # should match cluster region
+  APP_NAME: journal               # ***update ---> app name = image name = ECR repo name = namespace ***
+  CONTAINER_PORT: 8080            # ***update ---> same as LoadBalancer targetPort - which port is exposed on your image - check EXPOSE in Dockerfile - or comfirm default port
+  SERVICE_TYPE: LoadBalancer    # note capitalization ---> options are LoadBalancer, ClusterIP 
+  SERVICE_PORT: 80              # ***update ---> It is the port external users hit on the Load Balancer
+  REPLICAS: 2
+  APPLICATION_REPO: study-journal-app/
+
+jobs:
+  build-scan-push-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # ---------------------------
+      # AWS Auth (OIDC)
+      # ---------------------------
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_OIDC_ROLE_ARN}}
+          aws-region: ${{ env.AWS_REGION }}
+      
+
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # ---------------------------
+      # Static Code Analysis (SonarQube)
+      # ---------------------------
+  
+      # - name: SonarQube Scan
+      #   uses: sonarsource/sonarqube-scan-action@master
+      #   env:
+      #     SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+      #     SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+      #   with:
+      #     projectBaseDir: ${{ env.APPLICATION_REPO }}
+
+      # ---------------------------
+      # OWASP Dependency Scanning (OWASP)
+      # ---------------------------
+  
+      # - name: Dependency Check
+      #   uses: dependency-check/Dependency-Check_Action@main
+      #   with:
+      #     project: ${{ env.APP_NAME }}
+      #     path: ${{ env.APPLICATION_REPO }}
+      #     format: 'HTML'
+      #     out: '${{ env.APPLICATION_REPO}}reports'
+
+      # - name: Upload Report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: dep-check-report
+      #     path: ${{ env.APPLICATION_REPO}}reports
+
+      # ---------------------------
+      # Build Docker Image
+      # ---------------------------
+      - name: Build Docker image --
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ env.APPLICATION_REPO }}
+          push: false
+          load: true
+          tags: ${{ env.ECR_REGISTRY }}/${{ env.APP_NAME }}:${{ github.run_number }}
+
+      # ---------------------------
+      # Trivy Image Scan
+      # ---------------------------
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ env.ECR_REGISTRY }}/${{ env.APP_NAME }}:${{ github.run_number }}
+          severity: HIGH, CRITICAL
+          exit-code: 0
+          ignore-unfixed: true
+
+      # ---------------------------
+      # Push to ECR 
+      # ---------------------------
+      - name: Create ECR repository if not exists
+        run: |
+          aws ecr describe-repositories --repository-names ${{ env.APP_NAME }} || \
+          aws ecr create-repository \
+            --repository-name ${{ env.APP_NAME }} \
+            --image-tag-mutability MUTABLE \
+            --image-scanning-configuration scanOnPush=true
+
+      - name: Push image to Amazon ECR
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ env.APPLICATION_REPO }}
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ env.APP_NAME }}:${{ github.run_number }}
+            ${{ env.ECR_REGISTRY }}/${{ env.APP_NAME }}:latest
+
+      # ---------------------------
+      # Setup Kubectl
+      # ---------------------------
+      - name: Setup Kubectl --
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.29.0'
+
+      # ---------------------------
+      # Update kubeconfig (EKS)
+      # ---------------------------
+      - name: Update Kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      # - name: Verify Connection
+      #   run: |
+      #     kubectl get nodes 
+
+      # ----------------------------
+      # Deploy to EKS
+      # ---------------------------
+      - name: Deploy to EKS..
+        run: |
+            # 1. Map GitHub environment variables to Shell variables for envsubst
+            export APP_NAME=${{ env.APP_NAME }}
+            export REPLICAS=${{ env.REPLICAS }}
+            export ECR_REGISTRY=${{ env.ECR_REGISTRY }}
+            export CONTAINER_PORT=${{ env.CONTAINER_PORT }}
+            export SERVICE_TYPE=${{ env.SERVICE_TYPE }}
+            export SERVICE_PORT=${{ env.SERVICE_PORT }}
+            export IMAGE_TAG=${{ github.run_number }}
+
+            # 2. Create namespace if missing
+            kubectl get namespace ${APP_NAME} || kubectl create namespace $APP_NAME
+
+            # 3. Use envsubst to swap variables and pipe to kubectl ---> The '-' tells kubectl to read the result of envsubst
+            envsubst < ./k8s-manifests/deployment.yaml | kubectl apply -f - -n $APP_NAME
+            envsubst < ./k8s-manifests/service.yaml | kubectl apply -f - -n $APP_NAME
+            
+            # 4. Wait a moment for the ELB to be assigned by AWS
+            echo "Waiting for Service to be provisioned..."
+            sleep 10
+
+            echo "If Load Balancer DNS...Remember to allow up to 2 minutes for your LoadBalancer to be provisioned and available..."
+            sleep 3
+
+            echo "--------------------------------------------------"
+            echo "Here is a list of pods in $APP_NAME namespace..."
+            echo "--------------------------------------------------"
+            kubectl get pods -n $APP_NAME
+            sleep 2
+
+            echo "-----------------------------------------------------"
+            echo "Here is a list of services in $APP_NAME namespace..."
+            echo "-----------------------------------------------------"
+            kubectl get svc -n $APP_NAME
+            
+        # ***Had to adjust as above since regular formating below was throwing an error with the manifest files
+        # kubectl apply -f k8s-manifests/deployment.yaml -n ${{ env.APP_NAME }}
+        # kubectl apply -f k8s-manifests/service.yaml -n ${{ env.APP_NAME }}

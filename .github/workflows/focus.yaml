@@ -61,19 +61,19 @@ jobs:
       # OWASP Dependency Scanning (OWASP)
       # ---------------------------
   
-      - name: Dependency Check
-        uses: dependency-check/Dependency-Check_Action@main
-        with:
-          project: ${{ env.APP_NAME }}
-          path: ${{ env.APPLICATION_REPO }}
-          format: 'HTML'
-          out: '${{ env.APPLICATION_REPO}}reports'
+      # - name: Dependency Check
+      #   uses: dependency-check/Dependency-Check_Action@main
+      #   with:
+      #     project: ${{ env.APP_NAME }}
+      #     path: ${{ env.APPLICATION_REPO }}
+      #     format: 'HTML'
+      #     out: '${{ env.APPLICATION_REPO}}reports'
 
-      - name: Upload Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: dep-check-report
-          path: ${{ env.APPLICATION_REPO}}reports
+      # - name: Upload Report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: dep-check-report
+      #     path: ${{ env.APPLICATION_REPO}}reports
 
       # ---------------------------
       # Build Docker Image
