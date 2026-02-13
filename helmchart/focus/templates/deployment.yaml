@@ -1,16 +1,16 @@
-apiVersion: v1
-kind: Namespace
-spec:
-  metadata:
-    name: {{ .Values.app }}
+# apiVersion: v1
+# kind: Namespace
+# spec:
+#   metadata:
+#     name: {{ .Values.app }}
 
----
+# ---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.deployment_name }}
-  namespace: {{ .Values.app }}
+  #namespace: {{ .Values.app }}
   labels:
     app: {{ .Values.app }}
 spec:
