@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: "{{ .Values.app }}-deployment"
+  namespace: {{ .Values.app }} # update to add namespace
   labels:
     app: {{ .Values.app }}
 
