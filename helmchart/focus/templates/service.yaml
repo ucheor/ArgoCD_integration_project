@@ -1,17 +1,20 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.app }}
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.service.service_name }}
-  namespace: {{ .Values.app }}    #update to add namespace
+  namespace: {{ .Values.app }}
   labels:
     app: {{ .Values.app }}
 spec:
-  type: {{ .Values.service.type}}
+  type: {{ .Values.service.type }}
   selector:
     app: {{ .Values.app }}
   ports:
     - protocol: {{ .Values.service.protocol }}
-      port: {{ .Values.service.port}}       # "Service Port." It is the port external users hit on the Load Balancer
-      targetPort: {{ .Values.service.target_port}}  # The port exposed on your image (from Docker Build image) - port where your application is listening inside the container - ContainerPort
-
-
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.target_port }}

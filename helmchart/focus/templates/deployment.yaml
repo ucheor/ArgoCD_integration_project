@@ -10,10 +10,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.deployment_name }}
-  namespace: {{ .Values.app }}      # update to add namespace
+  namespace: {{ .Values.app }}
   labels:
     app: {{ .Values.app }}
-
 spec:
   replicas: {{ .Values.replicas }}
   selector:
@@ -28,4 +27,4 @@ spec:
         - name: {{ .Values.app }}
           image: "{{ .Values.ECR_REGISTRY }}/{{ .Values.app }}:{{ .Values.IMAGE_TAG }}"
           ports:
-            - containerPort: {{ .Values.CONTAINER_PORT }}
+            - containerPort: {{ .Values.service.CONTAINER_PORT }} # Fixed path
