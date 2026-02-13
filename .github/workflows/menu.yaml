@@ -151,9 +151,9 @@ jobs:
         run: |
           aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
-      # - name: Verify Connection
-      #   run: |
-      #     kubectl get nodes 
+      - name: Verify Connection
+        run: |
+           kubectl get nodes 
 
       # ----------------------------
       # Deploy to EKS
@@ -169,7 +169,7 @@ jobs:
             export SERVICE_PORT=${{ env.SERVICE_PORT }}
             export IMAGE_TAG=${{ github.run_number }}
 
-            # 2. Create namespace if missing
+            # 2. Create namespace if missing ---
             kubectl get namespace ${APP_NAME} || kubectl create namespace $APP_NAME
 
             # 3. Use envsubst to swap variables and pipe to kubectl ---> The '-' tells kubectl to read the result of envsubst
