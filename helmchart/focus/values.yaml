@@ -7,11 +7,12 @@ app: focus
 replicas: 2
 ECR_REGISTRY: 826433291202.dkr.ecr.us-east-1.amazonaws.com
 IMAGE_TAG: 38
-
-
+deployment_name: focus-deployment
 
 service:
   type: LoadBalancer
   port: 80
   target_port: 80
+  CONTAINER_PORT: 80
   protocol: TCP
+  service_name: focus-service

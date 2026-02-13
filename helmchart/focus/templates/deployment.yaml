@@ -1,9 +1,16 @@
+apiVersion: v1
+kind: Namespace
+spec:
+  metadata:
+    name: {{ .Values.app }}
+
+---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "{{ .Values.app }}-deployment"
-  namespace: {{ .Values.app }} # update to add namespace
+  name: {{ .Values.deployment_name }}
+  namespace: {{ .Values.app }}      # update to add namespace
   labels:
     app: {{ .Values.app }}
 
