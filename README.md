@@ -13,3 +13,4 @@ EXPOSE 8080
 index.html deployment to Apache Tomcat
 docker image
 
+extra stuff
